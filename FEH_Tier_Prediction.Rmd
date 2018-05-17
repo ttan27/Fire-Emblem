@@ -1,0 +1,71 @@
+---
+title: "FEH Tier Prediction"
+author: "Timothy Tan"
+date: "May 16, 2018"
+output: github_document
+---
+
+```{r include=FALSE}
+source('tier_prediction.R')
+```
+
+###Introduction
+The popular mobile game, Fire Emblem Heroes, has many different groups of people trying to figure out what are the best characters? One such website is fireemblemheroes.gamepress.gg, where they have created an Arena Tier List to best rate characters for their gameplay ability. I, not being an expert in building the units, have decided to use the statistics of each character to try and predict what tier they will be ranked by the folks at gamepress.
+
+###Linear Regression Model
+```{r echo=FALSE}
+lm_heroes
+data.frame(Accuracy = accuracy_lm)
+linearplot
+```
+
+Using a simple Linear Regression Model, I predicted each hero's class based on their class, movement type, hit points, attack, speed, defense, resistance, and total stats. The result was around `r round(accuracy_lm, 2)*100`%, with about `r round(accuracy_lm * nrow(heroes),2)` correctly predicted heroes. 
+
+###Complex Linear Regression Model
+```{r echo=FALSE}
+clm_heroes
+data.frame(Accuracy = accuracy_clm)
+```
+
+Upon examining the Linear Regression Model, I adjusted the equation to weight attack and speed differently, to see if there was a change in the accuracy of the model. The result was around `r round(accuracy_clm, 2)*100`%, with about `r round(accuracy_clm * nrow(heroes),2)` correctly predicted heroes, which was better than just the simple Linear Regression Model. However, the data is not quite linearly separable, so I looked toward other models. 
+
+###Neural Network
+```{r echo=FALSE}
+data.frame(Accuracy = accuracy_neuralnet)
+neuralnet_heroes$model.list$response="output"; plot(neuralnet_heroes, rep=1, fill="gray", cex=0.7, lwd=0.5, information=FALSE)
+```
+
+The next model I decided to use was the Neural Network model, with backpropogation. In this one, I needed to remove the Class and Movement Type, as they were non-numeric values. This one did not work well at all, and the model predicted the same tier across the board. The result was around `r round(accuracy_neuralnet, 2)*100`%, with about `r round(accuracy_neuralnet * nrow(heroes),2)` correctly predicted heroes, which was much worse than the other models.
+
+###Decision Tree
+```{r echo=FALSE}
+data.frame(Accuracy = accuracy_dt)
+rpart.plot(dt_heroes, tweak=0.7, type=1, extra=101, space=6, digits=4)
+```
+
+Next I decided to run a decision tree model, using the anova method. The result was around `r round(accuracy_dt, 2)*100`%, with about `r round(accuracy_dt * nrow(heroes),2)` correctly predicted heroes, which was around the same as the linear models.
+
+###Support Vector Machine
+```{r echo=FALSE}
+svm_heroes
+data.frame(Accuracy = accuracy_svm)
+```
+The final model I tried was the support vector machine. After tuning the model, I set the parameters of gamma = 1, cost = 0.1, scale = TRUE, and degree = 4. Surprisingly, the prediction was nearly 100%, coming in at `r round(accuracy_svm, 4)*100`%, with `r round(accuracy_svm * nrow(heroes),2)` correctly predicted heroes. Upon examination, the only character not predicted correctly was Lucina, who is Tier 1, but predicted Tier 2. This makes sense, as there is another character Masked Marth with an identical statline, but ranked in Tier 2. 
+
+I am suspicious about the accuracy of this model, but I cannot find what could be wrong with it.
+
+###Testing New Heroes
+Upon the next release of heroes, I will test these models on the new heroes and try to predict their tier, before the analysis of gamepress. The results will be here.
+
+###Conclusion
+Due to the relatively low accuracy of most of the models, I believe that there are many other stats that should be used to classify the characters into tiers. Some variables are harder to represent, such as skill availability, while others such as character availability could be brought in. There can also be errors while attempting to create these models. When I tried cross-validation with folds, I encountered the error of trying to predict characters who have unique categorical variables, such as Legendary Lyn and Robin, who have the unique classes of Green Bow and Colorless Breath. The lack of prior data on these classes causes it to be difficult to predict their new class, as without class, accuracy drops significantly in my predictions.
+
+###References
+http://feheroes.gamepedia.com/Level_40_stats_table  
+http://fireemblem.gamepress.gg/inheritance-tier-list
+
+
+
+
+
+

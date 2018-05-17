@@ -43,6 +43,9 @@ lm_heroes <- lm(Tier ~ Class + Movement + HP + ATK + SPD + DEF + RES + Total, he
 heroes$lm_prediction <- as.class(predict(lm_heroes, heroes))
 accuracy_lm = length(which(heroes$Tier == heroes$lm_prediction)) / length(heroes$Tier == heroes$lm_prediction)
 accuracy_lm
+linearplot <- ggplot(heroes) +
+  geom_point(aes(x=ATK, y=Tier), color="Green") +
+  geom_point(aes(x=ATK, y=heroes$lm_prediction), color="Red")
 
 #complex linear regression model
 clm_heroes <- lm(Tier ~ Class + Movement + HP + log(ATK) + log(SPD) + DEF + RES + Total, heroes)
@@ -84,24 +87,36 @@ accuracy_dt = length(which(heroes$Tier == heroes$dt_prediction)) / length(heroes
 accuracy_dt
 
 #testing with folds
-nfold = 3
+# nfold = 3
+# 
+# set.seed(12345)
+# test = createFolds(heroes$Tier, k=nfold)
+# train = createFolds.train(heroes$Tier, test)
+# lm_hero = list()
+# lm_predict = list()
+# lm_accuracy = c()
+# 
+# for (fold in 1:nfold)
+# {
+#   lm_hero[[fold]] = lm(Tier ~ Class + Movement + HP + ATK + SPD + DEF + RES + Total, heroes[train[[fold]],])
+#   lm_predict[[fold]] = heroes[test[[fold]],]
+#   lm_predict[[fold]]$predicted = as.class(predict(lm_hero[[fold]], heroes[test[[fold]],]))
+#   lm_accuracy[fold] = length(which(lm_predict[[fold]]$Tier == lm_predict[[fold]]$predicted)) / length(lm_predict[[fold]]$Tier == lm_predict[[fold]]$predicted)
+# }
+# 
+# accuracy_lm = mean(lm_accuracy)
 
-set.seed(12345)
-test = createFolds(heroes$Tier, k=nfold)
-train = createFolds.train(heroes$Tier, test)
-lm_hero = list()
-lm_predict = list()
-lm_accuracy = c()
 
-for (fold in 1:nfold)
-{
-  lm_hero[[fold]] = lm(Tier ~ Class + Movement + HP + ATK + SPD + DEF + RES + Total, heroes[train[[fold]],])
-  lm_predict[[fold]]$predicted = predict(lm_hero[[fold]], heroes[test[[fold]],])
-  lm_accuracy[fold] = length(which(heroes$Tier == lm_predict[[fold]]$predicted)) / length(heroes$Tier == lm_predict[[fold]]$predicted)
-}
 
-lm_predict
-lm_accuracy
+
+
+
+
+
+
+
+
+
 
 
 
