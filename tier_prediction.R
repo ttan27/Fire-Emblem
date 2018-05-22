@@ -22,6 +22,9 @@ library(e1071,     verbose=FALSE, warn.conflicts=FALSE, quietly=TRUE)
 
 
 heroes <- read_csv('data/heroes.csv')
+bridal_heroes <- read_csv('data/bridal_heroes.csv')
+# bridal_heroes$Tier <- as.factor(bridal_heroes$Tier)
+levels(bridal_heroes$Tier) <- c(0, 1, 2, 3, 4, 5, 6)
 
 #functions
 as.class <- function(value){
@@ -46,12 +49,14 @@ accuracy_lm
 linearplot <- ggplot(heroes) +
   geom_point(aes(x=ATK, y=Tier), color="Green") +
   geom_point(aes(x=ATK, y=heroes$lm_prediction), color="Red")
+bridal_heroes$lm_prediction <- as.class(predict(lm_heroes, bridal_heroes))
 
 #complex linear regression model
 clm_heroes <- lm(Tier ~ Class + Movement + HP + log(ATK) + log(SPD) + DEF + RES + Total, heroes)
 heroes$clm_prediction <- as.class(predict(clm_heroes, heroes))
 accuracy_clm = length(which(heroes$Tier == heroes$clm_prediction)) / length(heroes$Tier == heroes$clm_prediction)
 accuracy_clm
+bridal_heroes$clm_prediction <- as.class(predict(clm_heroes, bridal_heroes))
 
 #support vector machine
 #tuning
@@ -72,6 +77,8 @@ svm_heroes <- svm(Tier ~ Class + Movement + HP + ATK + SPD + DEF + RES + Total, 
 heroes$svm_prediction <- predict(svm_heroes, heroes)
 accuracy_svm = length(which(heroes$Tier == heroes$svm_prediction)) / length(heroes$Tier == heroes$svm_prediction)
 accuracy_svm
+#bridal_heroes$svm_prediction <- predict(svm_heroes, bridal_heroes)
+
 
 #neuralnet
 set.seed(12345)
@@ -79,12 +86,32 @@ neuralnet_heroes = neuralnet(Tier ~ HP + ATK + SPD + DEF + RES + Total, heroes, 
 heroes$neuralnet_prediction <- as.class(compute(neuralnet_heroes, heroes[,4:9])$net.result)
 accuracy_neuralnet = length(which(heroes$Tier == heroes$neuralnet_prediction)) / length(heroes$Tier == heroes$neuralnet_prediction)
 accuracy_neuralnet
+bridal_heroes$neuralnet_prediction <- as.class(compute(neuralnet_heroes, bridal_heroes[,4:9])$net.result)
 
 #decision tree
 dt_heroes = rpart(Tier ~ Class + Movement + HP + ATK + SPD + DEF + RES + Total, heroes, method="anova")
 heroes$dt_prediction <- as.class(predict(dt_heroes, heroes))
 accuracy_dt = length(which(heroes$Tier == heroes$dt_prediction)) / length(heroes$Tier == heroes$dt_prediction)
 accuracy_dt
+bridal_heroes$dt_prediction <- as.class(predict(dt_heroes, bridal_heroes))
+
+freq <- table(c(bridal_heroes$lm_prediction, bridal_heroes$clm_prediction, 
+                bridal_heroes$dt_prediction))
+
+#from stackexchange
+Mode <- function(x) {
+  ux <- unique(x)
+  ux[which.max(tabulate(match(x, ux)))]
+}
+
+for(i in 1:nrow(bridal_heroes)){
+  bridal_heroes$prediction[i] <- Mode(bridal_heroes[i, 11:14])
+}
+bridal_heroes$prediction <- as.integer(bridal_heroes$prediction)
+
+
+
+
 
 #testing with folds
 # nfold = 3

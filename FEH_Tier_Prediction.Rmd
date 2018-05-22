@@ -55,9 +55,13 @@ The final model I tried was the support vector machine. After tuning the model, 
 I am suspicious about the accuracy of this model, but I cannot find what could be wrong with it.
 
 ###Testing New Heroes
-Upon the next release of heroes, I will test these models on the new heroes and try to predict their tier, before the analysis of gamepress. The results will be here.
+Recently released were the Bridal Bloom heroes, which includes four new units. Using the model I have trained, I have predicted the tiers of these new units. Upon examination, I anticipated that the prediction for Ninian would be incorrect, as the statline indicates a lower tier, but what brings characters like Ninian to higher tiers is their abilities to "dance" other characters, which I do not account for in the model. In order to improve accuracy, I may include that characteristic for the heroes in the future. 
+```{r echo=FALSE}
+bridal_heroes[,c('Name', 'Tier', 'prediction')]
+```
 
-###Conclusion
+
+###Concluding Thoughts
 Due to the relatively low accuracy of most of the models, I believe that there are many other stats that should be used to classify the characters into tiers. Some variables are harder to represent, such as skill availability, while others such as character availability could be brought in. There can also be errors while attempting to create these models. When I tried cross-validation with folds, I encountered the error of trying to predict characters who have unique categorical variables, such as Legendary Lyn and Robin, who have the unique classes of Green Bow and Colorless Breath. The lack of prior data on these classes causes it to be difficult to predict their new class, as without class, accuracy drops significantly in my predictions.
 
 ###References
